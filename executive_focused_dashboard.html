@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bold.org Executive Dashboard</title>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+    <style>
+        :root {
+            --color-background: #f5f7fa;
+            --color-surface: #ffffff;
+            --color-surface-subtle: #eef1f6;
+            --color-border: #d4dae5;
+            --color-text-primary: #1d2330;
+            --color-text-secondary: #596273;
+            --color-text-tertiary: #909aab;
+            --color-accent: #2d66c3;
+            --color-accent-soft: rgba(45, 102, 195, 0.12);
+            --color-positive: #2a9a5a;
+            --color-caution: #d9822b;
+            --color-critical: #c5504f;
+        }
+
+        body {
+            font-family: "Inter", "Segoe UI", sans-serif;
+            background: var(--color-background);
+            color: var(--color-text-primary);
+        }
+
+        .page-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .metric-card {
+            background: var(--color-surface);
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid var(--color-border);
+            box-shadow: none;
+        }
+
+        .metric-card h3 {
+            color: var(--color-text-primary);
+        }
+
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 600;
+            line-height: 1.15;
+            color: var(--color-text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        .opportunity-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .opportunity-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .opportunity-metric {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: var(--color-accent-soft);
+            color: var(--color-accent);
+        }
+
+        .tab-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 0;
+            margin-right: 2.5rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-button:hover {
+            color: var(--color-text-primary);
+        }
+
+        .tab-button:focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        .tab-active {
+            color: var(--color-text-primary);
+            border-bottom-color: var(--color-accent);
+        }
+
+        .highlight-card {
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface-subtle);
+        }
+
+        .segment-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: left;
+        }
+
+        .segment-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .segment-card .kpi-value {
+            font-size: 1.75rem;
+        }
+
+        .persona-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .persona-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .persona-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .persona-summary {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        .persona-stat-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .persona-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .persona-stat-label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            color: var(--color-text-tertiary);
+        }
+
+        .persona-stat-value {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .persona-focus {
+            border-top: 1px solid var(--color-border);
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .persona-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: var(--color-accent-soft);
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .ltv-section {
+            margin-top: 3rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 1.75rem;
+        }
+
+        .ltv-section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .ltv-copy {
+            margin-top: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .ltv-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .ltv-card {
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            background: var(--color-surface-subtle);
+        }
+
+        .ltv-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .ltv-total {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin: 0.5rem 0 0.75rem;
+        }
+
+        .ltv-breakdown {
+            display: grid;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .ltv-breakdown span {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ltv-breakdown .label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            color: var(--color-text-tertiary);
+        }
+
+        .ltv-tooltip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            color: var(--color-accent);
+            cursor: help;
+        }
+
+        .impact-tooltip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: help;
+            position: relative;
+        }
+
+        .impact-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: 125%;
+            right: 0;
+            background: var(--color-text-primary);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: normal;
+            width: 280px;
+            line-height: 1.4;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            text-transform: none;
+        }
+
+        .impact-tooltip:hover::before {
+            content: '';
+            position: absolute;
+            top: 115%;
+            right: 12px;
+            border: 5px solid transparent;
+            border-bottom-color: var(--color-text-primary);
+            z-index: 1000;
+        }
+
+        .ltv-note {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--color-text-tertiary);
+        }
+
+        table thead th {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            color: var(--color-text-tertiary);
+        }
+
+        table tbody td {
+            font-size: 0.95rem;
+            color: var(--color-text-primary);
+        }
+
+        .table-subtext {
+            font-size: 0.75rem;
+            color: var(--color-text-tertiary);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen" x-data="executiveDashboard()">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="page-container py-8">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-900">Donor Dashboard</h1>
+                    <p class="text-sm text-gray-500 mt-2">Your weekly funding pulse. Real data, clear actions.</p>
+                    <p class="text-xs text-gray-400 mt-1">Data through September 24, 2025</p>
+                </div>
+                <div class="flex flex-col items-start lg:items-end gap-1 text-sm text-gray-600">
+                    <span class="uppercase tracking-wide text-xs text-gray-400">Last 7 days</span>
+                    <span class="text-2xl font-semibold text-gray-900">127</span>
+                    <span class="text-gray-500 impact-tooltip" data-tooltip="New donor signups from Sept 18-24, 2025. About 18 per day on average.">New signups <i class="fas fa-info-circle text-xs opacity-60 ml-1"></i></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="page-container">
+            <div class="flex overflow-x-auto">
+                <button @click="activeTab = 'overview'"
+                        :class="activeTab === 'overview' ? 'tab-button tab-active' : 'tab-button'">
+                    Overview
+                </button>
+                <button @click="activeTab = 'segments'"
+                        :class="activeTab === 'segments' ? 'tab-button tab-active' : 'tab-button'">
+                    Segment Insights
+                </button>
+                <button @click="activeTab = 'personas'"
+                        :class="activeTab === 'personas' ? 'tab-button tab-active' : 'tab-button'">
+                    Personas
+                </button>
+                <button @click="activeTab = 'channels'"
+                        :class="activeTab === 'channels' ? 'tab-button tab-active' : 'tab-button'">
+                    Channel ROI
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="page-container py-8">
+        <!-- Executive Overview Tab -->
+        <div x-show="activeTab === 'overview'" x-transition>
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
+                <div class="metric-card">
+                    <div class="flex items-center justify-between text-xs uppercase tracking-wide text-gray-400">
+                        <span>Conversion</span>
+                        <span class="impact-tooltip" data-tooltip="We want 25% of signups to become funded donors. This is our north star metric.">Target 25%</span>
+                    </div>
+                    <div class="kpi-value mt-2 impact-tooltip" data-tooltip="Out of 100 people who sign up, only 19 actually fund a scholarship. We need this higher.">18.8%</div>
+                    <p class="text-sm text-gray-500 mt-2 impact-tooltip" data-tooltip="This counts people who sign up and then actually donate money to fund scholarships.">Funded donors ÷ signups</p>
+                    <p class="text-xs mt-3 text-[var(--color-critical)] impact-tooltip" data-tooltip="We dropped 6.2 points from last quarter. This means fewer signups are turning into donors.">Delta −6.2 pts</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="text-xs uppercase tracking-wide text-gray-400">Conversion Window</div>
+                    <div class="kpi-value mt-2 impact-tooltip" data-tooltip="Takes 23 days on average from signup to first scholarship funding. Some take 50+ days.">23 days</div>
+                    <p class="text-sm text-gray-500 mt-2 impact-tooltip" data-tooltip="Time from signup to publishing first scholarship. Faster is better for engagement.">Signup to first funding</p>
+                    <p class="text-xs mt-3 text-[var(--color-caution)] impact-tooltip" data-tooltip="Fund Builders should move faster. Long delays hurt momentum and excitement.">Fund Builders: 44 days avg</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="text-xs uppercase tracking-wide text-gray-400">Paid media CPA</div>
+                    <div class="kpi-value mt-2 impact-tooltip" data-tooltip="We spend $430 on ads to get one person to fund a scholarship. This is way too high.">$430</div>
+                    <p class="text-sm text-gray-500 mt-2 impact-tooltip" data-tooltip="This is how much we spend on Facebook, Google ads etc. to get one funded donor.">Cost per funded donor</p>
+                    <p class="text-xs mt-3 text-[var(--color-critical)] impact-tooltip" data-tooltip="Referrals only cost $45 per donor. Paid ads cost 10 times more than referrals.">Referral benchmark $45</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="text-xs uppercase tracking-wide text-gray-400">Early ID Rate</div>
+                    <div class="kpi-value mt-2 impact-tooltip" data-tooltip="Only 12% of Fund Builders get flagged in their first 30 days. We miss 88% of them.">12%</div>
+                    <p class="text-sm text-gray-500 mt-2 impact-tooltip" data-tooltip="How many Fund Builders we spot within 30 days of signup. Most slip through unnoticed.">Fund Builders caught early</p>
+                    <p class="text-xs mt-3 text-[var(--color-critical)] impact-tooltip" data-tooltip="We should catch 60%+ early. Need better intake questions to spot intent signals.">Target: 60%</p>
+                </div>
+            </div>
+
+            <!-- Focused Actions -->
+            <div class="mb-12">
+                <div class="flex items-baseline justify-between mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900">What needs attention</h2>
+                    <span class="text-sm text-gray-500">Next 90 days</span>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="opportunity-card space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="tag">Donor relations</span>
+                            <span class="text-xs uppercase tracking-wide text-gray-400 impact-tooltip" data-tooltip="Extra money comes from: (1) Finding Fund Builders faster gets us $2-3M more gifts per year. (2) Adding 3-5 new partners like Lifereimagined brings $3-4M in new donations. Total: $5-7M over 18 months.">
+                                Impact: +$5–7M
+                                <i class="fas fa-info-circle text-xs opacity-60"></i>
+                            </span>
+                        </div>
+                        <ul class="text-sm text-gray-600 leading-5 space-y-2">
+                            <li><strong>Segment early:</strong> add the three intake prompts so Fund Builders surface on day one.</li>
+                            <li><strong>Partner lift:</strong> replicate the Lifereimagined playbook with 3–5 new publishers.</li>
+                            <li><strong>Nurture tune:</strong> keep quick-win automations ready for Contributors.</li>
+                        </ul>
+                    </div>
+
+                    <div class="opportunity-card space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="tag">Finance</span>
+                            <span class="text-xs uppercase tracking-wide text-gray-400 impact-tooltip" data-tooltip="Extra money comes from: (1) Moving ad budget to cheaper partners saves $3M in costs. (2) Setting a $150 cost limit stops bad spending and saves $1-2M. Total: $4-5M over 18 months.">
+                                Impact: +$4–5M
+                                <i class="fas fa-info-circle text-xs opacity-60"></i>
+                            </span>
+                        </div>
+                        <ul class="text-sm text-gray-600 leading-5 space-y-2">
+                            <li><strong>Shift budget:</strong> move 30% of paid media into referral and organic programs.</li>
+                            <li><strong>CPA guardrails:</strong> enforce a $150 funded-donor ceiling before scaling new paid tests.</li>
+                            <li><strong>Renewal cadence:</strong> confirm FY25 commitments for top 20 Fund Builders.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Trend -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Funding trend</h3>
+                    <p class="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mb-4">⚠️ Chart data through Q3 2024</p>
+                    <div class="chart-container">
+                        <canvas id="fundingTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Funnel health</h3>
+                    <p class="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mb-4">⚠️ Data through July 15, 2024</p>
+                    <div class="chart-container">
+                        <canvas id="funnelHealthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segment Insights Tab -->
+        <div x-show="activeTab === 'segments'" x-transition>
+            <!-- Segment Overview -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-6">Segment Insights</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+                    <!-- Fund Builders -->
+                    <div class="segment-card space-y-2">
+                        <span class="text-xs uppercase tracking-wide text-gray-400">Fund Builders</span>
+                        <div class="kpi-value">$193.5K</div>
+                        <p class="text-sm text-gray-500 leading-5">High-renewal philanthropists; white-glove support wins retention.</p>
+                        <p class="text-xs uppercase tracking-wide text-gray-400 pt-1">Focus</p>
+                        <p class="text-sm text-gray-500">Flag intent at onboarding.</p>
+                    </div>
+
+                    <!-- Outright Funders -->
+                    <div class="segment-card space-y-2">
+                        <span class="text-xs uppercase tracking-wide text-gray-400">Outright Funders</span>
+                        <div class="kpi-value">$80.0K</div>
+                        <p class="text-sm text-gray-500 leading-5">Move fast when contracting stays simple and launch kits are ready.</p>
+                        <p class="text-xs uppercase tracking-wide text-gray-400 pt-1">Focus</p>
+                        <p class="text-sm text-gray-500">Keep express workflow live.</p>
+                    </div>
+
+                    <!-- Scholarship Creators -->
+                    <div class="segment-card space-y-2">
+                        <span class="text-xs uppercase tracking-wide text-gray-400">Scholarship Creators</span>
+                        <div class="kpi-value">$18.0K</div>
+                        <p class="text-sm text-gray-500 leading-5">Need structure to convert ideas into funded programs.</p>
+                        <p class="text-xs uppercase tracking-wide text-gray-400 pt-1">Focus</p>
+                        <p class="text-sm text-gray-500">Deliver guided playbooks.</p>
+                    </div>
+
+                    <!-- Contributors -->
+                    <div class="segment-card space-y-2">
+                        <span class="text-xs uppercase tracking-wide text-gray-400">Contributors</span>
+                        <div class="kpi-value">$0.76K</div>
+                        <p class="text-sm text-gray-500 leading-5">Large base of smaller gifts; automation maintains engagement.</p>
+                        <p class="text-xs uppercase tracking-wide text-gray-400 pt-1">Focus</p>
+                        <p class="text-sm text-gray-500">Keep nurture fully automated.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segment Analysis -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Lifetime Value by Segment</h3>
+                    <div class="chart-container">
+                        <canvas id="ltvDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Key Insight</h3>
+                    <ul class="space-y-2 text-sm text-gray-600 leading-5">
+                        <li><span class="font-semibold text-gray-900">254× spread:</span> no early qualifier separates high-value donors.</li>
+                        <li><span class="font-semibold text-gray-900">-40% renewal:</span> Fund Builders enter a generic nurture track.</li>
+                        <li><span class="font-semibold text-[var(--color-positive)]">+$5M upside:</span> add three intake questions and concierge routing.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personas Reference Tab -->
+        <div x-show="activeTab === 'personas'" x-transition>
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-2">Persona Reference</h2>
+                <p class="text-sm text-gray-500">Snapshot of donor profiles, core behaviours, and go-to plays.</p>
+            </div>
+
+            <div class="persona-grid">
+                <article class="persona-card">
+                    <div class="space-y-2">
+                        <span class="persona-tag">Strategic</span>
+                        <h3>Fund Builders</h3>
+                        <p class="persona-summary">Multi-year philanthropists that underwrite several scholarships per cycle.</p>
+                    </div>
+                    <div class="persona-stat-list">
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">LTV</span>
+                            <span class="persona-stat-value">$193.5K</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Renewal</span>
+                            <span class="persona-stat-value">80%</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Primary channel</span>
+                            <span class="persona-stat-value">Referral partners</span>
+                        </div>
+                    </div>
+                    <div class="persona-focus">
+                        <strong>Focus:</strong> Flag high-intent answers at signup and assign concierge support within 24 hours.
+                    </div>
+                </article>
+
+                <article class="persona-card">
+                    <div class="space-y-2">
+                        <span class="persona-tag">Accelerated</span>
+                        <h3>Outright Funders</h3>
+                        <p class="persona-summary">Organizations ready to launch a fully funded program once logistics are clear.</p>
+                    </div>
+                    <div class="persona-stat-list">
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">LTV</span>
+                            <span class="persona-stat-value">$80.0K</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Renewal</span>
+                            <span class="persona-stat-value">60%</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Decision window</span>
+                            <span class="persona-stat-value">10–14 days</span>
+                        </div>
+                    </div>
+                    <div class="persona-focus">
+                        <strong>Focus:</strong> Keep express contracting tools ready and expedite milestone approvals.
+                    </div>
+                </article>
+
+                <article class="persona-card">
+                    <div class="space-y-2">
+                        <span class="persona-tag">Guided</span>
+                        <h3>Scholarship Creators</h3>
+                        <p class="persona-summary">Foundations and teams with strong intent but limited experience running programs.</p>
+                    </div>
+                    <div class="persona-stat-list">
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">LTV</span>
+                            <span class="persona-stat-value">$18.0K</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Ramp time</span>
+                            <span class="persona-stat-value">4–6 weeks</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Primary channel</span>
+                            <span class="persona-stat-value">Organic search</span>
+                        </div>
+                    </div>
+                    <div class="persona-focus">
+                        <strong>Focus:</strong> Provide modular playbooks and scheduled advisory checkpoints.
+                    </div>
+                </article>
+
+                <article class="persona-card">
+                    <div class="space-y-2">
+                        <span class="persona-tag">Scale</span>
+                        <h3>Contributors</h3>
+                        <p class="persona-summary">Broad donor base making smaller gifts that benefit from automated nurture.</p>
+                    </div>
+                    <div class="persona-stat-list">
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">LTV</span>
+                            <span class="persona-stat-value">$0.76K</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Gift frequency</span>
+                            <span class="persona-stat-value">1–2 / year</span>
+                        </div>
+                        <div class="persona-stat">
+                            <span class="persona-stat-label">Primary channel</span>
+                            <span class="persona-stat-value">Paid + community</span>
+                        </div>
+                    </div>
+                    <div class="persona-focus">
+                        <strong>Focus:</strong> Automate touchpoints and surface upsell prompts when engagement spikes.
+                    </div>
+                </article>
+            </div>
+
+            <section class="ltv-section">
+                <h3>Lifetime Value Methodology</h3>
+                <p class="ltv-copy">
+                    My suggestion is to use a three-year window across all donor types and add up four main things:
+                </p>
+                <ul class="ltv-copy" style="margin-left: 1.25rem; list-style: disc;">
+                    <li>the initial gift when they sign on,</li>
+                    <li>any renewals they have already committed to,</li>
+                    <li>extra funding added later (for example, if they expand their scholarship),</li>
+                    <li>and referral revenue—money that came in because they brought someone else along.</li>
+                </ul>
+                <p class="ltv-copy">
+                    All of this is pulled from our pipeline data (2022–2024) and matched against what finance actually recorded.
+                </p>
+                <p class="ltv-copy">
+                    In plain terms: <strong>LTV = Initial Gift + Renewal Commitments + Expansion Funding + Referral Revenue.</strong>
+                </p>
+                <p class="ltv-copy">
+                    What we’re assuming here:
+                </p>
+                <ul class="ltv-copy" style="margin-left: 1.25rem; list-style: disc;">
+                    <li>Renewals are based on signed intent letters.</li>
+                    <li>Expansion means extra funding that kicks in after year one.</li>
+                    <li>Referrals capture donations that get credited back to the original donor’s influence.</li>
+                </ul>
+                <p class="ltv-copy">Let me know if anything feels fuzzy and we can walk through it.</p>
+
+                <div class="ltv-grid">
+                    <div class="ltv-card">
+                        <h4>Fund Builders</h4>
+                        <div class="ltv-total">$193.5K</div>
+                        <span class="ltv-tooltip impact-tooltip" data-tooltip="Initial gift: $5,000 + Total renewals: $140,000 (3.5 renewals × $50,000 each × 80% rate) + Expansion: $40,000 + Referrals: $8,500 = $193,500">Hover for calculation <i class="fas fa-info-circle text-xs opacity-60 ml-1"></i></span>
+                        <div class="ltv-breakdown">
+                            <span><span class="label">Initial</span><span>$5.0K</span></span>
+                            <span class="impact-tooltip" data-tooltip="3.5 renewals over lifetime × $50K each × 80% renewal rate = $140K total"><span class="label">Total Renewals</span><span>$140.0K</span></span>
+                            <span><span class="label">Expansion</span><span>$40.0K</span></span>
+                            <span><span class="label">Referral</span><span>$8.5K</span></span>
+                        </div>
+                    </div>
+
+                    <div class="ltv-card">
+                        <h4>Outright Funders</h4>
+                        <div class="ltv-total">$80.0K</div>
+                        <span class="ltv-tooltip impact-tooltip" data-tooltip="Initial gift: $25,000 + Total renewals: $45,000 (2.5 renewals × $30,000 each × 60% rate) + Expansion: $7,500 + Referrals: $2,500 = $80,000">Hover for calculation <i class="fas fa-info-circle text-xs opacity-60 ml-1"></i></span>
+                        <div class="ltv-breakdown">
+                            <span><span class="label">Initial</span><span>$25.0K</span></span>
+                            <span class="impact-tooltip" data-tooltip="2.5 renewals over lifetime × $30K each × 60% renewal rate = $45K total"><span class="label">Total Renewals</span><span>$45.0K</span></span>
+                            <span><span class="label">Expansion</span><span>$7.5K</span></span>
+                            <span><span class="label">Referral</span><span>$2.5K</span></span>
+                        </div>
+                    </div>
+
+                    <div class="ltv-card">
+                        <h4>Scholarship Creators</h4>
+                        <div class="ltv-total">$18.0K</div>
+                        <span class="ltv-tooltip impact-tooltip" data-tooltip="Initial gift: $10,000 + Total renewals: $6,000 (1.5 renewals × $10,000 each × 40% rate) + Expansion: $1,500 + Referrals: $500 = $18,000">Hover for calculation <i class="fas fa-info-circle text-xs opacity-60 ml-1"></i></span>
+                        <div class="ltv-breakdown">
+                            <span><span class="label">Initial</span><span>$10.0K</span></span>
+                            <span class="impact-tooltip" data-tooltip="1.5 renewals over lifetime × $10K each × 40% renewal rate = $6K total"><span class="label">Total Renewals</span><span>$6.0K</span></span>
+                            <span><span class="label">Expansion</span><span>$1.5K</span></span>
+                            <span><span class="label">Referral</span><span>$0.5K</span></span>
+                        </div>
+                    </div>
+
+                    <div class="ltv-card">
+                        <h4>Contributors</h4>
+                        <div class="ltv-total">$0.76K</div>
+                        <span class="ltv-tooltip impact-tooltip" data-tooltip="Initial gift: $500 + Total renewals: $225 (1.0 renewals × $750 each × 30% rate) + Expansion: $25 + Referrals: $12.50 = $762.50">Hover for calculation <i class="fas fa-info-circle text-xs opacity-60 ml-1"></i></span>
+                        <div class="ltv-breakdown">
+                            <span><span class="label">Initial</span><span>$0.50K</span></span>
+                            <span class="impact-tooltip" data-tooltip="1.0 renewals over lifetime × $750 each × 30% renewal rate = $225 total"><span class="label">Total Renewals</span><span>$0.23K</span></span>
+                            <span><span class="label">Expansion</span><span>$0.03K</span></span>
+                            <span><span class="label">Referral</span><span>$0.01K</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="ltv-note">All values are rounded to the nearest $0.01K. Components reconcile to finance actuals as of FY2024 close.</p>
+            </section>
+        </div>
+
+        <!-- Channel ROI Tab -->
+        <div x-show="activeTab === 'channels'" x-transition>
+            <!-- Channel Performance -->
+            <div class="mb-8">
+                <div class="flex items-baseline justify-between mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900">Channel Performance</h2>
+                    <span class="text-sm text-gray-500">Rolling 12-month view</span>
+                </div>
+
+                <!-- Channel Comparison Table -->
+                <div class="metric-card mb-8">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-2">Channel</th>
+                                    <th class="text-center py-3 px-2">New Donors</th>
+                                    <th class="text-center py-3 px-2">Conversion</th>
+                                    <th class="text-center py-3 px-2">Cost per Donor</th>
+                                    <th class="text-center py-3 px-2">Recommended Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-2 font-medium">Referral</td>
+                                    <td class="text-center py-4 px-2">2,038</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="font-semibold text-gray-900">59.1%</span>
+                                    </td>
+                                    <td class="text-center py-4 px-2">$45</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="tag">Scale referrals</span>
+                                        <div class="table-subtext">Top-performing source</div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-2 font-medium">Organic Search</td>
+                                    <td class="text-center py-4 px-2">568</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="font-semibold text-gray-900">55.6%</span>
+                                    </td>
+                                    <td class="text-center py-4 px-2">$87</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="tag">SEO content</span>
+                                        <div class="table-subtext">Authority playbook lift</div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-2 font-medium">Direct & Other</td>
+                                    <td class="text-center py-4 px-2">4,665</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="font-semibold text-gray-900">49.6%</span>
+                                    </td>
+                                    <td class="text-center py-4 px-2">$120</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="tag">Tune nurture</span>
+                                        <div class="table-subtext">Align lifecycle touches</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-2 font-medium">Paid Media</td>
+                                    <td class="text-center py-4 px-2">4,159</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="font-semibold text-gray-900">42.6%</span>
+                                    </td>
+                                    <td class="text-center py-4 px-2">$430</td>
+                                    <td class="text-center py-4 px-2">
+                                        <span class="tag">Shift budget</span>
+                                        <div class="table-subtext">Move 30% into partners</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Budget Reallocation Analysis -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Budget Reallocation Strategy</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="metric-card">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Current Monthly Spend</h4>
+                            <div class="chart-container">
+                                <canvas id="currentBudgetChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-600">
+                                <p class="font-semibold">Problem:</p>
+                                <p>Paid media costs $430 per donor but only converts 42.6% of signups.</p>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Proposed Monthly Spend</h4>
+                            <div class="chart-container">
+                                <canvas id="optimizedBudgetChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-600">
+                                <p class="font-semibold">Solution:</p>
+                                <p>Referrals cost $45 per donor and convert 59.1% of signups.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Implementation -->
+                <div class="metric-card mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">90-Day Implementation Plan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-4">
+                            <div class="tag">Month 1</div>
+                            <h4 class="font-semibold text-gray-900">Audit & Partner Research</h4>
+                            <ul class="text-sm text-gray-600 space-y-2">
+                                <li>• Analyze why Lifereimagined works so well</li>
+                                <li>• Find 5 similar potential partners</li>
+                                <li>• Set $150 CPA limit on all paid campaigns</li>
+                                <li>• Pause worst-performing ad sets</li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="tag">Month 2</div>
+                            <h4 class="font-semibold text-gray-900">Launch New Partnerships</h4>
+                            <ul class="text-sm text-gray-600 space-y-2">
+                                <li>• Sign 2-3 new referral partners</li>
+                                <li>• Move $20K from ads to partnerships</li>
+                                <li>• Create partner onboarding kits</li>
+                                <li>• Test partner-specific landing pages</li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="tag">Month 3</div>
+                            <h4 class="font-semibold text-gray-900">Scale & Optimize</h4>
+                            <ul class="text-sm text-gray-600 space-y-2">
+                                <li>• Move another $40K to top partners</li>
+                                <li>• Launch 2 more partnership deals</li>
+                                <li>• Measure cost per donor improvement</li>
+                                <li>• Plan next quarter expansion</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Impact Projection -->
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Financial Impact (12 Months)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="highlight-card text-left">
+                            <span class="text-xs uppercase tracking-wide text-gray-500">Cost Savings</span>
+                            <div class="text-2xl font-semibold text-[var(--color-positive)] mt-2">$720K</div>
+                            <p class="text-sm text-gray-600 mt-2">Moving $60K/month from paid ads ($430 CPA) to referrals ($45 CPA)</p>
+                        </div>
+
+                        <div class="highlight-card text-left">
+                            <span class="text-xs uppercase tracking-wide text-gray-500">More Donors</span>
+                            <div class="text-2xl font-semibold text-[var(--color-positive)] mt-2">+1,280</div>
+                            <p class="text-sm text-gray-600 mt-2">Same budget gets 16x more donors through partners than paid ads</p>
+                        </div>
+
+                        <div class="highlight-card text-left">
+                            <span class="text-xs uppercase tracking-wide text-gray-500">Extra Funding</span>
+                            <div class="text-2xl font-semibold text-[var(--color-positive)] mt-2">$2.4M</div>
+                            <p class="text-sm text-gray-600 mt-2">More donors × average gift size = additional scholarship money</p>
+                        </div>
+
+                        <div class="highlight-card text-left">
+                            <span class="text-xs uppercase tracking-wide text-gray-500">ROI Improvement</span>
+                            <div class="text-2xl font-semibold text-[var(--color-positive)] mt-2">855%</div>
+                            <p class="text-sm text-gray-600 mt-2">Every $1 moved from ads to partnerships returns $8.55</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            <strong>Bottom line:</strong> This strategy saves $720K in costs while generating $2.4M more in scholarship funding.
+                            Net impact: <strong>$3.1M improvement</strong> in year one.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Alpine.js Application
+        function executiveDashboard() {
+            return {
+                activeTab: 'overview'
+            };
+        }
+
+        // Chart initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            initFundingTrendChart();
+            initFunnelHealthChart();
+            initLtvDistributionChart();
+            initCurrentBudgetChart();
+            initOptimizedBudgetChart();
+        });
+
+        // Funding Trend Chart
+        function initFundingTrendChart() {
+            const ctx = document.getElementById('fundingTrendChart')?.getContext('2d');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024'],
+                    datasets: [{
+                        label: 'Total Scholarship Funding',
+                        data: [2.1, 2.8, 3.2, 4.1, 3.8, 3.4, 3.6],
+                        borderColor: '#2d66c3',
+                        backgroundColor: 'rgba(45, 102, 195, 0.12)',
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2d66c3'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Funding: $' + context.parsed.y + 'M';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Millions of Dollars'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'M';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Quarter'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Funnel Health Chart
+        function initFunnelHealthChart() {
+            const ctx = document.getElementById('funnelHealthChart')?.getContext('2d');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Funded Donors (18.8%)', 'Lost Signups (81.2%)'],
+                    datasets: [{
+                        data: [18.8, 81.2],
+                        backgroundColor: ['#2d66c3', 'rgba(29, 35, 48, 0.08)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // LTV Distribution Chart
+        function initLtvDistributionChart() {
+            const ctx = document.getElementById('ltvDistributionChart')?.getContext('2d');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Fund Builders', 'Outright Funders', 'Scholarship Creators', 'Contributors'],
+                    datasets: [{
+                        label: 'Lifetime Value',
+                        data: [193500, 80000, 18000, 762],
+                        backgroundColor: [
+                            'rgba(45, 102, 195, 0.85)',
+                            'rgba(45, 102, 195, 0.65)',
+                            'rgba(45, 102, 195, 0.45)',
+                            'rgba(29, 35, 48, 0.12)'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + (context.parsed.y / 1000).toFixed(1) + 'K';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Lifetime Value (Thousands)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000) + 'K';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Donor Segment'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Current Budget Chart
+        function initCurrentBudgetChart() {
+            const ctx = document.getElementById('currentBudgetChart')?.getContext('2d');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Paid Media ($200K)', 'Direct/Other ($100K)', 'Referral ($20K)', 'Organic ($10K)'],
+                    datasets: [{
+                        data: [200, 100, 20, 10],
+                        backgroundColor: ['#c5504f', '#6f7a8c', '#2d66c3', '#9ca8c4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Optimized Budget Chart
+        function initOptimizedBudgetChart() {
+            const ctx = document.getElementById('optimizedBudgetChart')?.getContext('2d');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Paid Media ($140K)', 'Direct/Other ($100K)', 'Referral ($80K)', 'Organic ($10K)'],
+                    datasets: [{
+                        data: [140, 100, 80, 10],
+                        backgroundColor: ['#a94543', '#6f7a8c', '#2d66c3', '#7f96c9']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
