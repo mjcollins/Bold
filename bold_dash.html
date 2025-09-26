@@ -383,13 +383,13 @@
                         :class="activeTab === 'overview' ? 'tab-button tab-active' : 'tab-button'">
                     Overview
                 </button>
-                <button @click="activeTab = 'segments'"
-                        :class="activeTab === 'segments' ? 'tab-button tab-active' : 'tab-button'">
-                    Segment Insights
-                </button>
                 <button @click="activeTab = 'personas'"
                         :class="activeTab === 'personas' ? 'tab-button tab-active' : 'tab-button'">
                     Personas
+                </button>
+                <button @click="activeTab = 'insights'"
+                        :class="activeTab === 'insights' ? 'tab-button tab-active' : 'tab-button'">
+                    Persona Insights & LTV
                 </button>
                 <button @click="activeTab = 'channels'"
                         :class="activeTab === 'channels' ? 'tab-button tab-active' : 'tab-button'">
@@ -496,11 +496,12 @@
             </div>
         </div>
 
-        <!-- Segment Insights Tab -->
-        <div x-show="activeTab === 'segments'" x-transition>
+
+        <!-- Personas Tab -->
+        <div x-show="activeTab === 'personas'" x-transition>
             <!-- Segment Overview -->
             <div class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-6">Segment Insights</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-6">Donor Personas</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                     <!-- Fund Builders -->
@@ -541,30 +542,8 @@
                 </div>
             </div>
 
-            <!-- Segment Analysis -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="metric-card">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Lifetime Value by Segment</h3>
-                    <div class="chart-container">
-                        <canvas id="ltvDistributionChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Key Insight</h3>
-                    <ul class="space-y-2 text-sm text-gray-600 leading-5">
-                        <li><span class="font-semibold text-gray-900">254× spread:</span> no early qualifier separates high-value donors.</li>
-                        <li><span class="font-semibold text-gray-900">-40% renewal:</span> Fund Builders enter a generic nurture track.</li>
-                        <li><span class="font-semibold text-[var(--color-positive)]">+$5M upside:</span> add three intake questions and concierge routing.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Personas Reference Tab -->
-        <div x-show="activeTab === 'personas'" x-transition>
             <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-2">Persona Reference</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-2">Detailed Personas</h2>
                 <p class="text-sm text-gray-500">Snapshot of donor profiles, core behaviours, and go-to plays.</p>
             </div>
 
@@ -668,6 +647,30 @@
                         <strong>Focus:</strong> Automate touchpoints and surface upsell prompts when engagement spikes.
                     </div>
                 </article>
+            </div>
+
+        </div>
+
+        <!-- Persona Insights & LTV Tab -->
+        <div x-show="activeTab === 'insights'" x-transition>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Lifetime Value by Segment</h3>
+                    <p class="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mb-4">⚠️ Based on analysis model estimates</p>
+                    <div class="chart-container">
+                        <canvas id="ltvDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Strategic Insights</h3>
+                    <ul class="space-y-3 text-sm text-gray-600 leading-5">
+                        <li><span class="font-semibold text-gray-900">Early ID Problem:</span> Only 12% of Fund Builders get flagged in first 30 days</li>
+                        <li><span class="font-semibold text-gray-900">Generic Nurture:</span> High-value donors enter same track as small contributors</li>
+                        <li><span class="font-semibold text-[var(--color-positive)]">+$5M Opportunity:</span> Add intake questions and concierge routing for Fund Builders</li>
+                        <li><span class="font-semibold text-gray-900">Speed Matters:</span> Fund Builders take 44 days to first funding vs 23 day average</li>
+                    </ul>
+                </div>
             </div>
 
             <section class="ltv-section">
